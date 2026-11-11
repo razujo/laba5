@@ -11,10 +11,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- * Задание 4. Калькулятор для вещественных чисел (+, -, *, /).
- * Действия выполняются последовательно, без приоритета: 2 + 3 * 4 = 20.
- */
+// Задание 4. Калькулятор для вещественных чисел (+, -, *, /).
+// Действия выполняются последовательно, без приоритета: 2 + 3 * 4 = 20.
 public class Task4Calculator extends Application {
     private final Label display = new Label("0");
     private final Label history = new Label("");
@@ -72,19 +70,25 @@ public class Task4Calculator extends Application {
     }
 
     private void onKey(String key) {
-        switch (key) {
-            case "+", "-", "*", "/" -> applyOperation(key);
-            case "=" -> applyOperation(null);
-            case "C" -> clear();
-            case "⌫" -> backspace();
-            case "±" -> negate();
-            case "." -> addPoint();
-            default -> addDigit(key);
+        if (key.equals("+") || key.equals("-") || key.equals("*") || key.equals("/")) {
+            applyOperation(key);
+        } else if (key.equals("=")) {
+            applyOperation(null);
+        } else if (key.equals("C")) {
+            clear();
+        } else if (key.equals("⌫")) {
+            backspace();
+        } else if (key.equals("±")) {
+            negate();
+        } else if (key.equals(".")) {
+            addPoint();
+        } else {
+            addDigit(key);
         }
     }
 
     private void addDigit(String digit) {
-        if (startNewNumber || "0".equals(display.getText())) {
+        if (startNewNumber || display.getText().equals("0")) {
             display.setText(digit);
             startNewNumber = false;
         } else {
@@ -103,8 +107,13 @@ public class Task4Calculator extends Application {
 
     private void negate() {
         String text = display.getText();
-        if (!"0".equals(text)) {
-            display.setText(text.startsWith("-") ? text.substring(1) : "-" + text);
+        if (text.equals("0")) {
+            return;
+        }
+        if (text.startsWith("-")) {
+            display.setText(text.substring(1));
+        } else {
+            display.setText("-" + text);
         }
     }
 
@@ -114,7 +123,10 @@ public class Task4Calculator extends Application {
         }
         String text = display.getText();
         text = text.substring(0, text.length() - 1);
-        display.setText(text.isEmpty() || "-".equals(text) ? "0" : text);
+        if (text.isEmpty() || text.equals("-")) {
+            text = "0";
+        }
+        display.setText(text);
     }
 
     private void clear() {
@@ -125,12 +137,10 @@ public class Task4Calculator extends Application {
         history.setText("");
     }
 
-    /**
-     * Выполняет отложенную операцию над накопленным результатом и текущим числом,
-     * затем запоминает новую операцию (null для «=»).
-     */
+    // считает предыдущую операцию (действия идут по очереди, без приоритета)
+    // и запоминает новую. Для "=" новая операция - null
     private void applyOperation(String nextOperation) {
-        if (startNewNumber && "Ошибка".equals(display.getText())) {
+        if (startNewNumber && display.getText().equals("Ошибка")) {
             return;
         }
         double current = Double.parseDouble(display.getText());
@@ -138,7 +148,7 @@ public class Task4Calculator extends Application {
         if (pendingOperation == null) {
             accumulator = current;
         } else if (!startNewNumber || nextOperation == null) {
-            if ("/".equals(pendingOperation) && current == 0) {
+            if (pendingOperation.equals("/") && current == 0) {
                 showDivisionByZero();
                 return;
             }
@@ -146,20 +156,26 @@ public class Task4Calculator extends Application {
         }
 
         String historyText = format(accumulator);
-        history.setText(nextOperation == null ? "" : historyText + " " + nextOperation);
+        if (nextOperation == null) {
+            history.setText("");
+        } else {
+            history.setText(historyText + " " + nextOperation);
+        }
         display.setText(historyText);
         pendingOperation = nextOperation;
         startNewNumber = true;
     }
 
-    private static double calculate(double a, double b, String operation) {
-        return switch (operation) {
-            case "+" -> a + b;
-            case "-" -> a - b;
-            case "*" -> a * b;
-            case "/" -> a / b;
-            default -> throw new IllegalArgumentException("Неизвестная операция " + operation);
-        };
+    private double calculate(double a, double b, String operation) {
+        if (operation.equals("+")) {
+            return a + b;
+        } else if (operation.equals("-")) {
+            return a - b;
+        } else if (operation.equals("*")) {
+            return a * b;
+        } else {
+            return a / b;
+        }
     }
 
     private void showDivisionByZero() {
@@ -172,12 +188,12 @@ public class Task4Calculator extends Application {
         alert.show();
     }
 
-    /** Убирает «.0» у целых результатов: 5.0 -> 5. */
-    private static String format(double value) {
-        if (value == Math.rint(value) && !Double.isInfinite(value) && Math.abs(value) < 1e15) {
-            return String.valueOf((long) value);
+    // убирает ".0" у целых чисел: 5.0 -> 5
+    private String format(double value) {
+        if (value == (long) value) {
+            return "" + (long) value;
         }
-        return String.valueOf(value);
+        return "" + value;
     }
 
     public static void main(String[] args) {

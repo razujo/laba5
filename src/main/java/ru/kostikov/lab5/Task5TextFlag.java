@@ -11,10 +11,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- * Задание 5. «Текстовый флаг»: выбор цвета каждой из трёх полос через RadioButton
- * и вывод сообщения с выбранными цветами. Размер окна изменить нельзя.
- */
+// Задание 5. «Текстовый флаг»: выбор цвета каждой из трёх полос через RadioButton
+// и вывод сообщения с выбранными цветами. Размер окна изменить нельзя.
 public class Task5TextFlag extends Application {
     private static final String[] COLORS = {"Красный", "Белый", "Синий", "Зелёный", "Жёлтый"};
 

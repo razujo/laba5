@@ -9,9 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- * Главное окно лабораторной работы №5: меню для запуска каждого задания в отдельном окне.
- */
+// Главное окно лабораторной работы №5: меню для запуска каждого задания в отдельном окне.
 public class MainApp extends Application {
 
     @Override

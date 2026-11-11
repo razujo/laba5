@@ -12,10 +12,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-/**
- * Задание 2. Несколько виджетов с чекбоксами рядом: снятый флажок прячет виджет,
- * установленный — показывает.
- */
+// Задание 2. Несколько виджетов с чекбоксами рядом: снятый флажок прячет виджет,
+// установленный — показывает.
 public class Task2ToggleWidgets extends Application {
 
     @Override

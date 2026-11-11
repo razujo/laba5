@@ -9,10 +9,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-/**
- * Задание 1. Перекидыватель слов: строка перелетает из одного поля в другое,
- * стрелка на кнопке показывает направление следующего переброса.
- */
+// Задание 1. Перекидыватель слов: строка перелетает из одного поля в другое,
+// стрелка на кнопке показывает направление следующего переброса.
 public class Task1WordSwapper extends Application {
     private static final String RIGHT = "→";
     private static final String LEFT = "←";

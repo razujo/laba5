@@ -1,8 +1,5 @@
 package ru.kostikov.lab5;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -16,28 +13,18 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-/**
- * Задание 3. Заказ в ресторане: выбор блюд, количество порций и чек.
- */
+// Задание 3. Заказ в ресторане
 public class Task3Restaurant extends Application {
 
-    /** Блюдо меню. */
-    private record Dish(String name, int price) { }
+    // меню: названия блюд и цены (одинаковый индекс = одно блюдо)
+    String[] names = {"Борщ", "Цезарь с курицей", "Паста карбонара", "Стейк из говядины", "Чизкейк", "Чай"};
+    int[] prices = {250, 390, 450, 890, 280, 120};
 
-    /** Строка меню на форме: блюдо, флажок выбора и счётчик порций. */
-    private record MenuRow(Dish dish, CheckBox checkBox, Spinner<Integer> count) { }
+    // для каждого блюда свой чекбокс и свой счётчик порций
+    CheckBox[] checkBoxes = new CheckBox[names.length];
+    Spinner<Integer>[] spinners = new Spinner[names.length];
 
-    private final List<Dish> menu = List.of(
-            new Dish("Борщ", 250),
-            new Dish("Цезарь с курицей", 390),
-            new Dish("Паста карбонара", 450),
-            new Dish("Стейк из говядины", 890),
-            new Dish("Чизкейк", 280),
-            new Dish("Чай", 120)
-    );
-
-    private final List<MenuRow> rows = new ArrayList<>();
-    private final TextArea receipt = new TextArea();
+    TextArea receipt = new TextArea();
 
     @Override
     public void start(Stage stage) {
@@ -48,33 +35,39 @@ public class Task3Restaurant extends Application {
         menuPane.add(new Label("Цена"), 1, 0);
         menuPane.add(new Label("Порций"), 2, 0);
 
-        for (int i = 0; i < menu.size(); i++) {
-            Dish dish = menu.get(i);
-            CheckBox checkBox = new CheckBox(dish.name());
+        for (int i = 0; i < names.length; i++) {
+            CheckBox checkBox = new CheckBox(names[i]);
             checkBox.setId("dish" + i);
-            Spinner<Integer> count = new Spinner<>(0, 20, 0);
-            count.setId("count" + i);
-            count.setPrefWidth(80);
-            count.setDisable(true);
+            Spinner<Integer> spinner = new Spinner<>(0, 20, 0);
+            spinner.setId("count" + i);
+            spinner.setPrefWidth(80);
+            spinner.setDisable(true);
 
-            // По умолчанию у выбранного блюда 1 порция, у снятого — 0
+            // если блюдо выбрали - ставим 1 порцию, если сняли - 0
             checkBox.setOnAction(e -> {
-                count.setDisable(!checkBox.isSelected());
-                count.getValueFactory().setValue(checkBox.isSelected() ? 1 : 0);
+                if (checkBox.isSelected()) {
+                    spinner.setDisable(false);
+                    spinner.getValueFactory().setValue(1);
+                } else {
+                    spinner.setDisable(true);
+                    spinner.getValueFactory().setValue(0);
+                }
                 updateReceipt();
             });
-            count.valueProperty().addListener((obs, oldValue, newValue) -> updateReceipt());
+            // когда меняется количество порций - пересчитываем чек
+            spinner.valueProperty().addListener((obs, oldValue, newValue) -> updateReceipt());
 
-            rows.add(new MenuRow(dish, checkBox, count));
+            checkBoxes[i] = checkBox;
+            spinners[i] = spinner;
             menuPane.add(checkBox, 0, i + 1);
-            menuPane.add(new Label(dish.price() + " ₽"), 1, i + 1);
-            menuPane.add(count, 2, i + 1);
+            menuPane.add(new Label(prices[i] + " ₽"), 1, i + 1);
+            menuPane.add(spinner, 2, i + 1);
         }
 
         Button order = new Button("Сформировать чек");
         order.setId("order");
         order.setOnAction(e -> updateReceipt());
-        menuPane.add(order, 0, menu.size() + 1);
+        menuPane.add(order, 0, names.length + 1);
 
         receipt.setId("receipt");
         receipt.setEditable(false);
@@ -85,6 +78,7 @@ public class Task3Restaurant extends Application {
         Label title = new Label("Меню ресторана");
         title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
+        // BorderPane: сверху заголовок, слева меню, справа чек
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(15));
         root.setTop(title);
@@ -98,22 +92,25 @@ public class Task3Restaurant extends Application {
         stage.show();
     }
 
-    private void updateReceipt() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%-18s %5s %9s%n", "Блюдо", "Кол.", "Сумма"));
-        sb.append("-".repeat(34)).append('\n');
+    void updateReceipt() {
+        String line = "----------------------------------\n";
+        String text = String.format("%-18s %5s %9s%n", "Блюдо", "Кол.", "Сумма");
+        text = text + line;
         int total = 0;
-        for (MenuRow row : rows) {
-            int count = row.count().getValue();
-            if (row.checkBox().isSelected() && count > 0) {
-                int sum = row.dish().price() * count;
-                total += sum;
-                sb.append(String.format("%-18s %5d %7d ₽%n", row.dish().name(), count, sum));
+        for (int i = 0; i < names.length; i++) {
+            if (spinners[i] == null) {
+                continue;
+            }
+            int count = spinners[i].getValue();
+            if (checkBoxes[i].isSelected() && count > 0) {
+                int sum = prices[i] * count;
+                total = total + sum;
+                text = text + String.format("%-18s %5d %7d ₽%n", names[i], count, sum);
             }
         }
-        sb.append("-".repeat(34)).append('\n');
-        sb.append(String.format("%-18s %15d ₽", "ИТОГО:", total));
-        receipt.setText(sb.toString());
+        text = text + line;
+        text = text + String.format("%-18s %15d ₽", "ИТОГО:", total);
+        receipt.setText(text);
     }
 
     public static void main(String[] args) {
